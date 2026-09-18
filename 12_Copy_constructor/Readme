@@ -1,0 +1,114 @@
+Copy Constructor:
+-----------------
+	A copy constructor is a special constructor that initializes a 
+	new object by copying the data of an existing object of 
+	the same class.
+
+
+	Syntax: A copy constructor takes a reference to an object of the same class:
+		ClassName(const ClassName& source);
+	
+		. const means the source object will not be modified.
+		. & means the source object is passed by reference.
+	
+	Why pass by reference?
+		If we wrote:
+			Player(Player source);
+		
+		The compiler would need to create a copy of source to pass it by value. 
+		That copy would require calling the copy constructor again, resulting 
+		in recursive copying.
+
+
+	Key Points:
+		1. It creates a new object from an existing object.
+		
+		ex:
+			GameCharacter warrior{"Warrior", 100, 50};
+			GameCharacter copy{warrior};
+
+		Here, copy is created using the data from warrior.
+
+
+		2. It takes a reference to an object of the same class.
+
+		ex:
+			GameCharacter(const GameCharacter& source);
+
+		3. It is normally declared with 'const' and reference (&).
+		
+		ex:
+			const GameCharacter& source
+
+		4. The copy constructor is called automatically in several situations, such as:
+			a. Direct initialization:
+				Player player2{player1};
+
+			b. Copy initialization:
+				Player player2 = player1;
+
+			c. Passing an object by value:
+				Player Raj {"Raj", 90, 10};
+				
+				void display(Player x)
+				{
+    					// x is copy of Raj
+					// x is local to display
+				}
+
+				display(Raj);
+
+			The parameter player is a copy of player1.
+
+			d . Returning an object by value:
+				Player p;
+				
+				Player create_player()
+				{
+				    Player temp{"Hero", 100, 50};
+				    return temp; // copy of temp is returned
+				}
+				p = create_player();
+				
+			However, copy elision/RVO may allow the compiler to avoid the actual copy.
+
+			e. Compiler-Generated Copy Constructor:
+				If you don't define a copy constructor, C++ can automatically 
+				generate one for the class. 
+
+			ex:
+				Player player1{"Hero", 100, 50};
+				Player player2{player1};
+	
+
+		5. A copy constructor can be explicitly defined by the programmer.
+		
+		ex:
+			GameCharacter::GameCharacter(const GameCharacter& source)
+    				: character_name{source.character_name},
+      				  health{source.health},
+      				  experience{source.experience}
+			{
+			}
+
+		6. If you don't write one, C++ normally provides an implicit copy constructor that 
+		   performs member-wise copying.
+
+
+		7. Copy constructor vs normal constructor:
+
+		ex:
+			
+			GameCharacter("Warrior", 100, 50);  // Normal constructor
+
+		creates an object from individual values.
+
+		ex:
+			GameCharacter copy{warrior};        // Copy constructor
+
+		creates an object from another GameCharacter object
+
+
+		
+
+	
