@@ -1,0 +1,470 @@
+What is a Program?
+	A program is basically:
+		Data + Operations on that data
+
+
+
+struct Student {
+    string name;
+    int age;
+    float marks;
+};
+
+
+void add_student(Student&);
+void update_marks(Student&);
+void calculate_grade(Student&);
+void display_student(const Student&);
+void save_student(const Student&);
+
+
+
+
+                 PROGRAM
+                    |
+          +---------+---------+
+          |                   |
+        DATA              OPERATIONS
+          |                   |
+       Student          add_student()
+                        update_marks()
+                        calculate_grade()
+                        display_student()
+                        save_student()
+
+
+
+
+
+What is Procedural Programming?
+	In procedural programming, we primarily organize the program around functions/procedures.
+
+
+The basic thinking is:
+	What operations do I need to perform?
+             ↓
+	Create functions
+             ↓
+	Pass data to those functions
+
+
+Example:
+	Student s;
+
+	update_marks(s);
+	calculate_grade(s);
+	display_student(s);
+
+
+
+These functions operate on the data.
+	This approach is perfectly valid.
+
+For example, C is procedural and is heavily used in:
+	Embedded systems
+	Device drivers
+	Operating systems
+	Firmware
+	Networking
+	Real-time systems
+
+
+
+What Problems Appear as the Program Grows?
+	1. Data and Functions Are Separated
+		The data is in one place.
+		The operations are somewhere else.
+
+
+		As the code base increaes, Which functions belong to this data? Which functions are allowed to modify it?
+		Which function is responsible for maintaining its validity?
+
+
+
+	2. Data Representation Changes
+		struct Student {
+    			string name;
+    			int age;
+    			vector<float> subject_marks;
+		};
+
+
+		Now functions that depended on the old representation may need modification:
+		
+		Internal data representation changes
+                ↓
+		Functions depending on that representation
+                ↓
+		Multiple functions may need modification	
+		
+
+	3. Data Is Exposed
+		struct BankAccount {
+    			double balance;
+		};
+
+		BankAccount account;
+			account.balance = -50000;
+		The internal state is directly exposed to the outside world.
+
+	4. Uncontrolled Modification of Shared Data
+
+	    Shared Data
+                 |
+      +----------+----------+
+      |          |          |
+   Function A Function B Function C
+      |          |          |
+      +----------+----------+
+                 |
+           modifies data
+
+
+
+Any of these functions might change the same data.
+	As the system grows, debugging becomes difficult because a change made in one place can affect behavior somewhere else.
+
+This creates:
+
+	Hidden dependencies
+	Side effects
+	Difficult debugging
+	Difficult testing
+
+
+	5. Tight Coupling
+		Suppose many functions know exactly how Student is internally represented.
+		
+	s.name
+	s.age
+	s.marks
+
+	Those functions are now coupled to the implementation of Student.
+
+What if we could keep the data and the operations that belong to that data together?
+
+
+
+
+Object-Oriented Programming:
+	1. What Is a Class?
+		A class allows us to define a new type containing:
+			->Data members
+			->Member functions
+
+
+class Student {
+    string name;
+    int age;
+    float marks;
+
+    void update_marks(float new_marks) {
+        marks = new_marks;
+    }
+
+    void display() {
+        cout << name << " "
+             << age << " "
+             << marks << endl;
+    }
+};
+
+                 Student
+                    |
+        +-----------+-----------+
+        |                       |
+    DATA MEMBERS          MEMBER FUNCTIONS
+        |                       |
+      name                update_marks()
+      age                 display()
+      marks
+
+
+A class combines related data and behavior into a single type.
+
+
+Encapsulation: Encapsulating (bundling) related data and 
+the functions that operate on that data into a single entity, typically a class.
+
+
+
+	2. What Is an Object?
+		The class is the type/definition.
+		We create actual objects from that class:
+
+		Student s1;
+		Student s2;
+
+
+
+Student  → class/type
+
+s1       → object
+s2       → object
+
+
+Each object has its own state:
+
+             Student class
+                  |
+          +-------+-------+
+          |               |
+         s1              s2
+       Object          Object
+          |               |
+      name=Ravi       name=Priya
+      age=21          age=22
+      marks=85        marks=92
+
+And each object can perform its behavior:
+	s1.display();
+	s2.display();
+
+	s1.update_marks(90);
+
+In the bove class:
+	everything is private by default
+
+Student
+│
+├── private
+│   ├── name
+│   ├── age
+│   ├── marks
+│   ├── update_marks()
+│   └── display()
+
+
+We cannot do:
+	Student s;
+
+	s.name = "Ravi";       // ERROR
+	s.age = 20;            // ERROR
+	s.marks = 90;          // ERROR
+	s.update_marks(95);    // ERROR
+	s.display();           // ERROR
+
+
+We have hidden everything, but the class isn't useful to outside code yet.
+
+
+
+Now expose selected functionality
+-------------------------------------------
+class Student {
+private:
+    string name;
+    int age;
+    float marks;
+
+public:
+    void update_marks(float new_marks) {
+        marks = new_marks;
+    }
+
+    void display() {
+        cout << name << " "
+             << age << " "
+             << marks << endl;
+    }
+};
+
+
+                    Student
+               +----------------+
+               |                |
+               |    PRIVATE     |
+               |                |
+               | name           |
+               | age            |
+               | marks          |
+               |                |
+               +-------+--------+
+                       |
+                 controlled access
+                       |
+               +-------+--------+
+               |                |
+               |    PUBLIC      |
+               |                |
+               | update_marks() |
+               | display()      |
+               |                |
+               +----------------+
+
+
+
+Outside code can now do:
+	Student s;
+
+	s.update_marks(90);  // OK
+	s.display();         // OK
+
+
+But 
+	s.marks = 90;        // ERROR
+
+
+C++ Access Specifiers:
+-------------------------------
+
+class Student {
+private:
+    string name;
+
+protected:
+    int age;
+
+public:
+    void display();
+};
+
+
+
+
+| Access specifier | Meaning                                                  |
+| ---------------- | -------------------------------------------------------- |
+| `private`        | Accessible only within the class (and permitted friends) |
+| `protected`      | Accessible within the class and derived classes          |
+| `public`         | Accessible from outside through an object                |
+
+
+
+-------------------------------------------------------------------------------------------------------------
+Constructors: 
+	A constructor is a special member function that is automatically called when an object is created.
+	Its main purpose is to initialize the object's data members.
+	
+	A constructor has the following characteristics:
+		1. The constructor name must be exactly the same as the class name.
+
+		Example: class MissionWallet
+			 {
+				public:
+  		  			MissionWallet();   // Constructor
+			 };
+
+	       2. A constructor does not have a return type.
+		  Not even void.
+		Example: MissionWallet();       // Correct
+			 void MissionWallet();  // Wrong		
+	      
+               3. A constructor is called automatically when an object is created.
+		Example: MissionWallet wallet;
+
+
+	       4. A constructor is normally declared in the class and defined outside the class.
+		  when using separate .h and .cpp files.
+
+		Example:     //.h file:
+ 
+			class MissionWallet
+			{
+				public:
+				    MissionWallet();
+			};	
+ 		
+	
+			     //.CPP
+			MissionWallet::MissionWallet()
+			{
+    				owner = "Unknown";
+    				credits = 0.0;
+			}
+
+		
+                5. A constructor can take parameters.
+		Example: MissionWallet(std::string name, double initial_credits);
+
+		MissionWallet::MissionWallet(std::string name, double initial_credits)
+    			: owner(name), credits(initial_credits)  //: is called a member initializer list
+		{
+
+		} 
+
+	        6. A constructor can be overloaded.
+
+		7. A constructor cannot be called like a normal function to create an object. 
+		   It is invoked as part of object construction.
+
+		8. Constructors are not inherited in the traditional sense by derived classes, 
+		   although modern C++ provides mechanisms such as using Base::Base to make base 
+                   constructors available to derived-class construction.
+
+Constructor
+    |
+    +-- Same name as class
+    |
+    +-- No return type
+    |
+    +-- Called automatically
+    |
+    +-- Called when object is created
+    |
+    +-- Initializes object
+    |
+    +-- Can have parameters
+    |
+    +-- Can be overloaded	
+
+
+
+default constructor: Is a constructor that can be called without providing any arguments.
+
+When a constructor is not created by user, default constructer is created by the compiler automatically. 
+
+The best practice is to provide user define no args constructor.
+
+Note: If a class contains a user-defined constructor, the compiler will not automatically generate a default (no-argument) 
+constructor. If a default constructor is required, the user must define it explicitly or use = default.
+
+If a constructor is created with arguments, we must always create an object with argument.
+
+->We can have multiple constructures, but each constructor must have a unique signature.
+
+============================================================================================================
+Destructor: A destructor is a special member function that is automatically called when an 
+object is destroyed, to perform cleanup of resources used by the object.
+
+	Same name as class, preceded by a tilde (~).
+ 
+	They are special mebmber methods.
+
+	Invoked automatically when thr object is destroyed.
+
+	No return type or no arguments required.
+
+
+	Same name as class, preceded by a tilde (~).
+ 
+
+	Destructor overloading is not allowed, we can only have one destructor.
+
+	Example: ~MissionRobot();
+
+
+Delegating Constructors:
+----------------------------------------------------------------------------
+1. Multiple constructors can sometimes contain duplicate initialization code.
+2. Duplicate code is undesirable because if the initialization logic changes, we may need to update it in multiple places.
+3. C++ allows one constructor to call another constructor of the same class.
+4. This is called a delegating constructor.
+5. The constructor that delegates does not perform the initialization itself. Instead, it passes 
+   the responsibility to another constructor.
+6. Delegation is specified in the constructor's initialization list.
+7. Delegating constructors help:
+
+	Avoid code duplication
+	Keep initialization logic in one place
+	Reduce maintenance effort
+	Reduce the possibility of inconsistent initialization
+	Make overloaded constructors easier to manage
+
+
+
+
+
+
+
+
+	
